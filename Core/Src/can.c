@@ -22,7 +22,7 @@
 
 /* USER CODE BEGIN 0 */
 
-
+ // <----- Battery Messages ----->
 CAN_TxHeaderTypeDef can_battery_headers[NUM_BATTERY_MSGS] = {
 
    /**
@@ -124,6 +124,71 @@ CAN_TxHeaderTypeDef can_battery_headers[NUM_BATTERY_MSGS] = {
     }
 };
 
+ // <----- Motor Controller Messages ----->
+CAN_TxHeaderTypeDef can_motor_headers[NUM_MOTOR_MSGS] = {
+
+   /**
+    * ID: 0x501
+    * Data length: 8
+    * Description: status information
+    * Decision: two random 32-bit numbers
+    */
+    {
+        .StdId = 0x0501,
+        .ExtId = 0x0000,
+        .IDE = CAN_ID_STD,
+        .RTR = CAN_RTR_DATA,
+        .DLC = 8,
+        .TransmitGlobalTime = DISABLE
+    },
+
+   /**
+    * ID: 0x502
+    * Data length: 8
+    *
+    * Description: bus voltage and current
+    * Decision: two random 32-bit numbers
+    */
+    {
+        .StdId = 0x0502,
+        .ExtId = 0x0000,
+        .IDE = CAN_ID_STD,
+        .RTR = CAN_RTR_DATA,
+        .DLC = 8,
+        .TransmitGlobalTime = DISABLE
+    },
+    
+   /**
+    * ID: 0x503
+    * Data length: 8
+    * Description: motor and vehicle velocity
+    * Decision: two random 32-bit numbers
+    */
+    {
+        .StdId = 0x0503,
+        .ExtId = 0x0000,
+        .IDE = CAN_ID_STD,
+        .RTR = CAN_RTR_DATA,
+        .DLC = 8,
+        .TransmitGlobalTime = DISABLE
+    },
+ 
+   /**
+    * ID: 0x50B
+    * Data length: 8
+    * Description: motor temperature
+    * Decision: random number from 0-100 is required
+    */
+    {
+        .StdId = 0x050B,
+        .ExtId = 0x0000,
+        .IDE = CAN_ID_STD,
+        .RTR = CAN_RTR_DATA,
+        .DLC = 8,
+        .TransmitGlobalTime = DISABLE
+    }
+};
+
 /* USER CODE END 0 */
 
 CAN_HandleTypeDef hcan;
@@ -220,31 +285,6 @@ void HAL_CAN_MspDeInit(CAN_HandleTypeDef* canHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
-/* *
- * <----- Motor controller messages ----->
- *
- * ID: 0x401
- * Data length: 
- * Description: 
- * Decision: 
- *
- * ID: 0x402
- * Data length: 
- * Description: 
- * Decision: 
- *
- * ID: 0x403
- * Data length: 
- * Description: 
- * Decision: 
- *
- * ID: 0x50B
- * Data length: 
- * Description: 
- * Decision: 
- *
- * /
 
 /* USER CODE END 1 */
 

@@ -43,9 +43,10 @@
 #define KERNEL_LED_DELAY 1000
 
 #define BATTERY_TX_DELAY 1000
-#define MOTOR_TEMP_TX_DELAY 1000
+#define MOTOR_TX_DELAY 1000
 
 #define MAX_CAN_BATT_TX_DELAY    200
+#define MAX_CAN_MOTOR_TX_DELAY    200
 
 /* USER CODE END PD */
 
@@ -59,7 +60,7 @@
 /* USER CODE BEGIN PV */
 
 osThreadId_t sendBatteryCANMsgHandle;
-osThreadId_t sendMotorTempMsgHandle;
+osThreadId_t sendMotorCANMsgHandle;
 osThreadId_t kernelLEDHandle;
 
 uint8_t battery_msg_data[8];
@@ -71,7 +72,7 @@ union FloatBytes {
 
 union FloatBytes motor_temp;
 
-
+/*
 CAN_TxHeaderTypeDef motor_temp_msg_header = {.StdId = 0x050B,
     .ExtId = 0x0000,
     .IDE = CAN_ID_STD,
@@ -79,6 +80,7 @@ CAN_TxHeaderTypeDef motor_temp_msg_header = {.StdId = 0x050B,
     .DLC = DATA_LENGTH,
     .TransmitGlobalTime = DISABLE
 };
+*/
 
 const osThreadAttr_t sendBatteryCANMsg_attr = {
     .name = "sendBatteryCANMsg",
@@ -86,7 +88,7 @@ const osThreadAttr_t sendBatteryCANMsg_attr = {
     .stack_size = 128 * 4
 };
 
-const osThreadAttr_t sendMotorTempMsg_attr = {
+const osThreadAttr_t sendMotorCANMsg_attr = {
     .name = "sendMotorCANMsg",
     .priority = (osPriority_t) osPriorityHigh,
     .stack_size = 128 * 4
@@ -107,7 +109,7 @@ uint32_t can_mailbox;
 uint32_t free_level;
 
 uint16_t changing_soc = 0;
-uint8_t changing_motor_temp = 10;
+// uint8_t changing_motor_temp = 10;
 
 /* USER CODE END PV */
 
@@ -117,7 +119,7 @@ void SystemClock_Config(void);
 
 void sendBatteryCANMsg(void *argument);
 void kernelLEDTask(void *argument);
-void sendMotorTempMsg(void *argument);
+void sendMotorCANMsg(void *argument);
 
 /* USER CODE END PFP */
 
@@ -152,7 +154,7 @@ int main(void)
     osKernelInitialize();
 
     sendBatteryCANMsgHandle = osThreadNew(sendBatteryCANMsg, NULL, &sendBatteryCANMsg_attr);
-    sendMotorTempMsgHandle = osThreadNew(sendMotorTempMsg, NULL, &sendMotorTempMsg_attr);
+    sendMotorCANMsgHandle = osThreadNew(sendMotorCANMsg, NULL, &sendMotorCANMsg_attr);
     // kernelLEDHandle = osThreadNew(kernelLEDTask, NULL, &kernelLED_attr);
 
     osKernelStart();
@@ -225,7 +227,7 @@ __NO_RETURN void kernelLEDTask (void *argument) {
     }
 }
 
-
+/*
 __NO_RETURN void sendMotorTempMsg(void *argument) {
     uint8_t msg_data[8] = {0};
 
@@ -249,6 +251,37 @@ __NO_RETURN void sendMotorTempMsg(void *argument) {
         osDelay(MOTOR_TEMP_TX_DELAY);
     }
 }
+*/
+
+__NO_RETURN void sendMotorCANMsg(void *argument) {
+
+    CAN_TxHeaderTypeDef rand_header;
+    
+    uint8_t rand_data[8] = {0};
+    uint32_t rand_index = 0;
+    uint16_t rand_delay = MAX_CAN_MOTOR_TX_DELAY;
+    
+    while (1) {
+        rand_index = rand(NUM_MOTOR_MSGS);
+        rand_header = can_motor_headers[rand_index];
+
+        rand_array(&rand_data[0], 8);
+
+        free_level = HAL_CAN_GetTxMailboxesFreeLevel(&hcan);
+        
+        status = HAL_CAN_AddTxMessage(&hcan, &rand_header, rand_data, &can_mailbox);
+
+        if (status != HAL_OK) {
+            error = 1;
+        } else {
+            HAL_GPIO_TogglePin(KERNEL_LED_GPIO_Port, KERNEL_LED_Pin);
+        }
+
+        rand_delay = rand(MAX_CAN_MOTOR_TX_DELAY);
+        osDelay(rand_delay);
+    }
+}
+
 
 __NO_RETURN void sendBatteryCANMsg(void *argument) {
     CAN_TxHeaderTypeDef rand_header;

@@ -39,6 +39,7 @@ extern CAN_HandleTypeDef hcan;
 #define NUM_MOTOR_MSGS      4
 
 extern CAN_TxHeaderTypeDef can_battery_headers[NUM_BATTERY_MSGS];
+extern CAN_TxHeaderTypeDef can_motor_headers[NUM_MOTOR_MSGS];
 
 /* USER CODE END Private defines */
 
